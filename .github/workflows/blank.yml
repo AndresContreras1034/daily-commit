@@ -2,37 +2,36 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 12 * * *'  # Todos los días a las 12:00 UTC (ajusta según tu hora local)
-  workflow_dispatch:       # Para ejecutar manualmente si quieres
+    - cron: '0 12 * * *'  # Ajusta la hora UTC a tu preferencia
+  workflow_dispatch:
 
 jobs:
   commit:
     runs-on: ubuntu-latest
     steps:
-      # 1. Clonar el repo con persistencia de credenciales para poder hacer push
+      # 1. Clonar el repositorio
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          persist-credentials: true
+          persist-credentials: false  # no usar credenciales automáticas
+          token: ${{ secrets.PAT }}  # usar tu PAT directamente
 
-      # 2. Actualizar el archivo daily.txt (solo crea o agrega fecha)
+      # 2. Actualizar daily.txt
       - name: Update daily file
-        run: |
-          echo "Update on $(date)" >> daily.txt
+        run: echo "Update on $(date)" >> daily.txt
 
-      # 3. Configurar usuario Git
+      # 3. Configurar Git
       - name: Configure Git
         run: |
           git config --global user.name "AndresContreras1034"
           git config --global user.email "contrerandres001@gmail.com"
 
-      # 4. Hacer commit si hay cambios
+      # 4. Commit
       - name: Commit changes
         run: |
           git add daily.txt
           git commit -m "Daily commit $(date)" || echo "No changes to commit"
 
-      # 5. Hacer push usando el PAT seguro
+      # 5. Push
       - name: Push changes
-        run: |
-          git push https://AndresContreras1034:${{ secrets.PAT }}@github.com/AndresContreras1034/daily-commit.git
+        run: git push origin main
